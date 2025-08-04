@@ -13,7 +13,7 @@ jobs:
   # MARK: - Swift Package Validation
   validate:
     name: Validate Package
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     
@@ -34,7 +34,7 @@ jobs:
   # MARK: - Build & Test
   test:
     name: Test on ${{ matrix.platform }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: validate
     strategy:
       matrix:
@@ -96,7 +96,7 @@ jobs:
   # MARK: - Fastlane CI
   fastlane-ci:
     name: Fastlane CI
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: validate
     
     steps:
@@ -136,7 +136,7 @@ jobs:
   # MARK: - Danger PR Review
   danger:
     name: Danger PR Review
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     if: github.event_name == 'pull_request'
     
     steps:
@@ -165,20 +165,21 @@ jobs:
   # MARK: - SwiftLint
   lint:
     name: SwiftLint
-    runs-on: ubuntu-latest
-    
+    runs-on: macos-latest
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: SwiftLint
-      uses: norio-nomura/action-swiftlint@3.2.1
-      with:
-        args: --strict
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint --strict
 
   # MARK: - Release
   release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: [test, fastlane-ci, lint, danger]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
