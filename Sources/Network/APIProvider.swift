@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoinGeckoCore
 
 public protocol GenericAPIProviderProtocol: Sendable {
     var bodyEncoding: BodyEncoding { get }
@@ -26,7 +27,7 @@ public enum BodyEncoding: Sendable {
 }
 
 public struct APIProvider<ResponseType: CodableModel>: APIEndpoint, GenericAPIProviderProtocol {
-    public let baseURLString: String
+    public let baseURLString: String?
     public let apiVersion: String?
     public let separatorPath: String?
     public let path: String
@@ -38,7 +39,7 @@ public struct APIProvider<ResponseType: CodableModel>: APIEndpoint, GenericAPIPr
     public let headers: [String: String]?
     
     public init(
-            baseURLString: String,
+            baseURLString: String? = APIConfiguration.shared.currentBaseURL,
             apiVersion: String? = nil,
             separatorPath: String? = nil,
             path: String,
@@ -63,17 +64,20 @@ public struct APIProvider<ResponseType: CodableModel>: APIEndpoint, GenericAPIPr
             
             // Setup headers with content type
             var defaultHeaders = ["Content-Type": bodyEncoding.contentTypeHeader]
-            if let customHeaders = headers {
-                for (key, value) in customHeaders {
-                    defaultHeaders[key] = value
-                }
+            if let apiKey = APIConfiguration.shared.apiKey {
+                defaultHeaders["x-cg-demo-api-key"] = apiKey
             }
+//            if let customHeaders = headers {
+//                for (key, value) in customHeaders {
+//                    defaultHeaders[key] = value
+//                }
+//            }
             self.headers = defaultHeaders
         }
         
         // Sendable params ile init
         public init(
-            baseURLString: String,
+            baseURLString: String? = APIConfiguration.shared.currentBaseURL,
             apiVersion: String? = nil,
             separatorPath: String? = nil,
             path: String,

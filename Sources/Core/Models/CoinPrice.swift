@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CoinGeckoNetwork
 
 public struct CoinPriceResponse: CodableModel {
     public let coins: [String: CoinPrice]

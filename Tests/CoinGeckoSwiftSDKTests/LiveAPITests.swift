@@ -22,6 +22,19 @@ final class LiveAPITests: XCTestCase {
         super.tearDown()
     }
     
+    func test_SupportedCurrencies_WithExecuteMethod_ReturnsValidCurrencies() async {
+        // When
+        do {
+            let response = try await API.supportedCurrencies().execute()
+            // Then
+            XCTAssertNotNil(response, "Response should not be nil")
+            
+            XCTAssertGreaterThan(response.count, 0, "Currencies array should not be empty")
+        } catch {
+            XCTFail("API call failed with error: \(error)")
+        }
+    }
+    
     // MARK: - Bitcoin Price Tests
     
     func test_CoinPrice_WithExecuteMethod_ReturnsValidUSDPrice() async {

@@ -1,0 +1,8 @@
+# Scanfile
+scheme "CoinGeckoSwiftSDK-Package"  # Swift Package scheme
+destination "platform=iOS Simulator,name=iPhone 16,OS=latest"
+code_coverage true
+prelaunch_simulator false
+derived_data_path "./Build/"
+skip_build false
+clean true

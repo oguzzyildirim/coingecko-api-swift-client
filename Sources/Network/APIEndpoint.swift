@@ -12,7 +12,7 @@ import Foundation
 /// This protocol provides a standardized way to configure and create network requests
 /// for different API endpoints by specifying URL components, HTTP method, headers, and body parameters.
 public protocol APIEndpoint {
-    var baseURLString: String { get }
+    var baseURLString: String? { get }
     //var apiVersion: String? { get }
     //var separatorPath: String? { get }
     var path: String { get }
@@ -42,7 +42,8 @@ extension APIEndpoint {
     /// Creates URLComponents from the endpoint configuration
     /// - Returns: Configured URLComponents or nil if creation fails
     private func createURLComponents() -> URLComponents? {
-        guard var components = URLComponents(string: baseURLString) else {
+        guard let baseURLString = baseURLString,
+                var components = URLComponents(string: baseURLString) else {
             return nil
         }
         

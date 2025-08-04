@@ -7,6 +7,7 @@
 
 import Foundation
 import CoinGeckoNetwork
+import CoinGeckoCore
 
 /// CoinGecko API endpoints
 public struct API {
@@ -25,6 +26,13 @@ public struct API {
     /// Reset API configuration (use free tier)
     public static func resetConfiguration() {
         APIConfiguration.shared.reset()
+    }
+    
+    public static func supportedCurrencies() -> APIProvider<SupportedCurrencies> {
+        return APIProvider<SupportedCurrencies>(
+            path: "simple/supported_vs_currencies",
+            method: .get
+        )
     }
     
     public static func coinPrice(
@@ -46,18 +54,8 @@ public struct API {
             URLQueryItem(name: "precision", value: "\(precision)")
         ]
         
-        var headers: [String: String] = [
-            "accept": "application/json"
-        ]
-        
-        if let apiKey = APIConfiguration.shared.apiKey {
-            headers["x-cg-demo-api-key"] = apiKey
-        }
-        
         return APIProvider<CoinPriceResponse>(
-            baseURLString: APIConfiguration.shared.currentBaseURL,
             path: "simple/price",
-            headers: headers,
             queryItems: queryItems,
             method: .get
         )

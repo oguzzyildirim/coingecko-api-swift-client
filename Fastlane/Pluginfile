@@ -1,0 +1,3 @@
+# Useful plugins for Swift Package development
+gem 'fastlane-plugin-versioning'
+gem 'fastlane-plugin-changelog'

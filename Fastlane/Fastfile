@@ -1,0 +1,126 @@
+fastlane_version '2.219'
+default_platform :ios
+
+platform :ios do
+  
+  desc "🧹 Clean everything"
+  lane :clean do
+    UI.header "Cleaning Swift Package"
+    
+    # Swift package clean
+    sh("cd .. && swift package clean")
+    
+    # Remove build artifacts
+    sh("rm -rf ../Build")
+    sh("rm -rf ../.build")
+    
+    UI.success "✅ Clean completed"
+  end
+  
+  desc "🔧 Setup dependencies"
+  lane :setup do
+    UI.header "Resolving Swift Package dependencies"
+    
+    sh("cd .. && swift package resolve")
+    
+    UI.success "✅ Dependencies resolved"
+  end
+  
+  desc "🏗️ Build Swift Package"
+  lane :build do |options|
+    UI.header "Building Swift Package"
+    
+    # Build for different platforms
+    platforms = options[:platforms] || ["iOS", "macOS", "tvOS", "watchOS"]
+    
+    platforms.each do |platform|
+      UI.message "Building for #{platform}..."
+      
+      case platform
+      when "iOS"
+        sh("cd .. && swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator")
+      when "macOS"
+        sh("cd .. && swift build")
+      when "tvOS"  
+        sh("cd .. && swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk appletvsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-tvos15.0-simulator")
+      when "watchOS"
+        sh("cd .. && swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk watchsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-watchos8.0-simulator")
+      end
+    end
+    
+    UI.success "✅ Build completed for all platforms"
+  end
+  
+  desc "🧪 Run tests"
+  lane :test do
+    UI.header "Running Swift Package tests"
+    
+    # Swift package test with coverage
+    sh("cd .. && swift test --enable-code-coverage")
+    
+    UI.success "✅ All tests passed"
+  end
+  
+  desc "📊 Generate test coverage"
+  lane :coverage do
+    UI.header "Generating code coverage report"
+    
+    # Run tests with coverage
+    sh("cd .. && swift test --enable-code-coverage")
+    
+    # Get coverage info (requires additional setup for detailed reports)
+    sh("cd .. && xcrun llvm-cov show .build/debug/CoinGeckoSwiftSDKPackageTests.xctest/Contents/MacOS/CoinGeckoSwiftSDKPackageTests -instr-profile .build/debug/codecov/default.profdata > coverage.txt")
+    
+    UI.success "✅ Coverage report generated"
+  end
+  
+  desc "🔍 Lint Swift code"
+  lane :lint do |options|
+    UI.header "Linting Swift code"
+    
+    if options[:fix]
+      # SwiftLint ile fix
+      sh("swiftlint --fix --quiet")
+    else
+      # Sadece lint
+      sh("swiftlint --quiet")
+    end
+    
+    UI.success "✅ Linting completed"
+  end
+  
+  desc "📦 Build release version"
+  lane :release_build do
+    UI.header "Building release version"
+    
+    # Release configuration ile build
+    sh("cd .. && swift build -c release")
+    
+    UI.success "✅ Release build completed"
+  end
+  
+  desc "🚀 Full CI pipeline"
+  lane :ci do
+    UI.header "Running full CI pipeline"
+    
+    clean
+    setup
+    lint
+    build
+    test
+    coverage
+    
+    UI.success "🎉 CI pipeline completed successfully!"
+  end
+  
+  desc "📋 Validate package"
+  lane :validate do
+    UI.header "Validating Swift Package"
+    
+    # Package validation
+    sh("cd .. && swift package dump-package")
+    
+    UI.success "✅ Package validation completed"
+  end
+
+end
