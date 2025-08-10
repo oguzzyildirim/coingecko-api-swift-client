@@ -7,18 +7,25 @@ on:
   workflow_dispatch:
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
+  # Use latest Xcode available on macOS-14 (Xcode 16.2 as of 2025)
+  DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
 
 jobs:
   # MARK: - Swift Package Validation
   validate:
     name: Validate Package
-    runs-on: macos-latest
+    runs-on: macos-14  # Use specific macOS version for consistency
     steps:
     - uses: actions/checkout@v4
     
+    # Set up Swift/Xcode version explicitly
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.1.0"  # Match your Package.swift version
+    
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -34,7 +41,7 @@ jobs:
   # MARK: - Build & Test
   test:
     name: Test on ${{ matrix.platform }}
-    runs-on: macos-latest
+    runs-on: macos-14  # Use specific macOS version for consistency
     needs: validate
     strategy:
       matrix:
@@ -43,8 +50,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    # Set up Swift/Xcode version explicitly
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.1.0"  # Match your Package.swift version
+    
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -96,14 +109,20 @@ jobs:
   # MARK: - Fastlane CI
   fastlane-ci:
     name: Fastlane CI
-    runs-on: macos-latest
+    runs-on: macos-14  # Use specific macOS version for consistency
     needs: validate
     
     steps:
     - uses: actions/checkout@v4
     
+    # Set up Swift/Xcode version explicitly
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.1.0"  # Match your Package.swift version
+    
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     # Ruby setup with Bundler
     - name: Set up Ruby
@@ -136,7 +155,7 @@ jobs:
   # MARK: - Danger PR Review
   danger:
     name: Danger PR Review
-    runs-on: macos-latest
+    runs-on: macos-14  # Use specific macOS version for consistency
     if: github.event_name == 'pull_request'
     
     steps:
@@ -165,7 +184,7 @@ jobs:
   # MARK: - SwiftLint
   lint:
     name: SwiftLint
-    runs-on: macos-latest
+    runs-on: macos-14  # Use specific macOS version for consistency
 
     steps:
       - uses: actions/checkout@v4
@@ -179,7 +198,7 @@ jobs:
   # MARK: - Release
   release:
     name: Create Release
-    runs-on: macos-latest
+    runs-on: macos-14  # Use specific macOS version for consistency
     needs: [test, fastlane-ci, lint, danger]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
@@ -188,8 +207,14 @@ jobs:
       with:
         fetch-depth: 0
     
+    # Set up Swift/Xcode version explicitly
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.1.0"  # Match your Package.swift version
+    
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     # Ruby setup for release tasks
     - name: Set up Ruby
