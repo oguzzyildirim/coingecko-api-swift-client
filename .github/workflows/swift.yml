@@ -8,7 +8,7 @@ on:
 
 env:
   # Use latest Xcode available on macOS-14 (Xcode 16.2 as of 2025)
-  DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
 
 jobs:
   # MARK: - Swift Package Validation
@@ -25,7 +25,7 @@ jobs:
         swift-version: "6.1.0"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -45,7 +45,7 @@ jobs:
     needs: validate
     strategy:
       matrix:
-        platform: [macOS]  # Only test macOS for now due to SPM limitations
+        platform: [iOS, macOS, tvOS, watchOS]
         
     steps:
     - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
         swift-version: "6.1.0"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -71,55 +71,40 @@ jobs:
       run: swift package resolve
     
     - name: Build for ${{ matrix.platform }}
-      run: swift build
+      run: |
+        case "${{ matrix.platform }}" in
+          iOS)
+            swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator
+            ;;
+          macOS)
+            swift build
+            ;;
+          tvOS)
+            swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk appletvsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-tvos15.0-simulator
+            ;;
+          watchOS)
+            swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk watchsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-watchos8.0-simulator
+            ;;
+        esac
     
-    - name: Run tests
+    - name: Run tests (macOS only)
+      if: matrix.platform == 'macOS'
       run: swift test --enable-code-coverage
     
     - name: Generate code coverage
+      if: matrix.platform == 'macOS'
       run: |
         xcrun llvm-cov export -format="lcov" \
           .build/debug/CoinGeckoSwiftSDKPackageTests.xctest/Contents/MacOS/CoinGeckoSwiftSDKPackageTests \
           -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
     
     - name: Upload coverage to Codecov
+      if: matrix.platform == 'macOS'
       uses: codecov/codecov-action@v4
       with:
         file: coverage.lcov
         flags: swift
         name: codecov-swift
-
-  # MARK: - Platform Compatibility Check (using Xcode)
-  platform-check:
-    name: Platform Compatibility Check
-    runs-on: macos-14
-    needs: validate
-    strategy:
-      matrix:
-        platform: [iOS, tvOS, watchOS]
-        
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
-    
-    - name: Build for ${{ matrix.platform }}
-      run: |
-        case "${{ matrix.platform }}" in
-          iOS)
-            # Use xcodebuild for iOS instead of swift build
-            xcodebuild -scheme CoinGeckoSwiftSDK -destination 'generic/platform=iOS Simulator' -sdk iphonesimulator build
-            ;;
-          tvOS)
-            # Use xcodebuild for tvOS instead of swift build
-            xcodebuild -scheme CoinGeckoSwiftSDK -destination 'generic/platform=tvOS Simulator' -sdk appletvsimulator build
-            ;;
-          watchOS)
-            # Use xcodebuild for watchOS instead of swift build
-            xcodebuild -scheme CoinGeckoSwiftSDK -destination 'generic/platform=watchOS Simulator' -sdk watchsimulator build
-            ;;
-        esac
 
   # MARK: - Fastlane CI
   fastlane-ci:
@@ -137,7 +122,7 @@ jobs:
         swift-version: "6.1.0"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     # Ruby setup with Bundler
     - name: Set up Ruby
@@ -214,7 +199,7 @@ jobs:
   release:
     name: Create Release
     runs-on: macos-14  # Use specific macOS version for consistency
-    needs: [test, platform-check, fastlane-ci, lint, danger]
+    needs: [test, fastlane-ci, lint, danger]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
@@ -229,7 +214,7 @@ jobs:
         swift-version: "6.1.0"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     
     # Ruby setup for release tasks
     - name: Set up Ruby
