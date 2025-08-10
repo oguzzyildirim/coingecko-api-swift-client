@@ -7,6 +7,8 @@
 
 import Foundation
 
+/// Represents the standard HTTP methods used for API requests.
+/// Conforms to `Sendable` to allow safe usage across concurrent contexts.
 public enum APIHTTPMethod: String, Sendable {
     case get
     case post

@@ -17,9 +17,8 @@ public struct SupportedCurrencies: CodableModel {
 }
 
 // MARK: - Codable Implementation
-extension SupportedCurrencies: Codable {
+public extension SupportedCurrencies: Codable {
     public init(from decoder: Decoder) throws {
-        // API direkt string array döndüğü için
         let container = try decoder.singleValueContainer()
         self.currencies = try container.decode([String].self)
     }
@@ -31,30 +30,26 @@ extension SupportedCurrencies: Codable {
 }
 
 // MARK: - Convenience Methods
-extension SupportedCurrencies {
-    /// Belirli bir currency'nin desteklenip desteklenmediğini kontrol eder
+public extension SupportedCurrencies {
     public func contains(_ currency: String) -> Bool {
         return currencies.contains(currency.lowercased())
     }
     
-    /// Crypto ve fiat currency'leri ayırır (basit heuristic)
     public var cryptoCurrencies: [String] {
         return currencies.filter { currency in
-            // Genellikle crypto'lar 3-4 karakter ve küçük harf
             currency.count <= 4 && currency.allSatisfy { $0.isLowercase || $0.isNumber }
         }
     }
     
     public var fiatCurrencies: [String] {
         return currencies.filter { currency in
-            // Fiat'lar genellikle 3 karakter ve büyük harf ISO kodu
             currency.count == 3 && currency.allSatisfy { $0.isUppercase }
         }
     }
 }
 
 // MARK: - Collection Conformance (Optional - Kullanım kolaylığı için)
-extension SupportedCurrencies: Collection {
+public extension SupportedCurrencies: Collection {
     public typealias Element = String
     public typealias Index = Array<String>.Index
     
@@ -70,7 +65,7 @@ extension SupportedCurrencies: Collection {
         return currencies[index]
     }
     
-    public func index(after i: Index) -> Index {
-        return currencies.index(after: i)
+    public func index(after index: Index) -> Index {
+        return currencies.index(after: index)
     }
 }

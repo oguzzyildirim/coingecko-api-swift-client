@@ -7,7 +7,11 @@
 
 import Foundation
 
+/// Application environment type
 public enum Environment {
+    /// Free version with basic features
     case free
+    
+    /// Paid version with all features
     case pro
 }
