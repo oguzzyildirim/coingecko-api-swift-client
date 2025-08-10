@@ -38,7 +38,7 @@ if swift_files.any?
   
   # Check for TODO/FIXME
   swift_files.each do |file|
-    next unless File.exists?(file)
+    next unless File.exist?(file)
     
     File.foreach(file).with_index do |line, index|
       if line.include?('TODO') || line.include?('FIXME')
