@@ -9,8 +9,10 @@ import Foundation
 
 // MARK: - SupportedCurrencies Model
 public struct SupportedCurrencies: CodableModel {
+    /// List of currency codes.
     public let currencies: [String]
     
+    /// Initialize with a list of currencies.
     public init(currencies: [String]) {
         self.currencies = currencies
     }
@@ -31,17 +33,20 @@ public extension SupportedCurrencies: Codable {
 
 // MARK: - Convenience Methods
 public extension SupportedCurrencies {
-    public func contains(_ currency: String) -> Bool {
+    /// Checks if currency exists (case-insensitive).
+    func contains(_ currency: String) -> Bool {
         return currencies.contains(currency.lowercased())
     }
     
-    public var cryptoCurrencies: [String] {
+    /// Returns crypto currencies (length ≤ 4, lowercase or digit).
+    var cryptoCurrencies: [String] {
         return currencies.filter { currency in
             currency.count <= 4 && currency.allSatisfy { $0.isLowercase || $0.isNumber }
         }
     }
     
-    public var fiatCurrencies: [String] {
+    /// Returns fiat currencies (length = 3, uppercase).
+    var fiatCurrencies: [String] {
         return currencies.filter { currency in
             currency.count == 3 && currency.allSatisfy { $0.isUppercase }
         }
@@ -53,19 +58,19 @@ public extension SupportedCurrencies: Collection {
     public typealias Element = String
     public typealias Index = Array<String>.Index
     
-    public var startIndex: Index {
+    var startIndex: Index {
         return currencies.startIndex
     }
     
-    public var endIndex: Index {
+    var endIndex: Index {
         return currencies.endIndex
     }
     
-    public subscript(index: Index) -> Element {
+    subscript(index: Index) -> Element {
         return currencies[index]
     }
     
-    public func index(after index: Index) -> Index {
+    func index(after index: Index) -> Index {
         return currencies.index(after: index)
     }
 }
