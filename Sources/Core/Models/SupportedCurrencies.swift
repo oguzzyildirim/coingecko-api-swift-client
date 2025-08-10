@@ -53,24 +53,34 @@ public extension SupportedCurrencies {
     }
 }
 
-// MARK: - Collection Conformance (Optional - Kullanım kolaylığı için)
+// MARK: - Collection Conformance (Optional - For ease of use)
 public extension SupportedCurrencies: Collection {
+    /// The type of elements stored in the collection.
     public typealias Element = String
+    
+    /// The type used for indexing into the collection.
     public typealias Index = Array<String>.Index
     
-    var startIndex: Index {
+    /// The position of the first element in a nonempty collection.
+    public var startIndex: Index {
         return currencies.startIndex
     }
     
-    var endIndex: Index {
+    /// The collection’s “past the end” position—that is, the position one greater than the last valid subscript argument.
+    public var endIndex: Index {
         return currencies.endIndex
     }
     
-    subscript(index: Index) -> Element {
+    /// Accesses the element at the specified position.
+    /// - Parameter index: The position of the element to access.
+    public subscript(index: Index) -> Element {
         return currencies[index]
     }
     
-    func index(after index: Index) -> Index {
+    /// Returns the position immediately after the given index.
+    /// - Parameter index: A valid index of the collection.
+    /// - Returns: The index value immediately after `index`.
+    public func index(after index: Index) -> Index {
         return currencies.index(after: index)
     }
 }
