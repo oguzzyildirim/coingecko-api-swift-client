@@ -45,7 +45,7 @@ jobs:
     needs: validate
     strategy:
       matrix:
-        platform: [iOS, macOS, tvOS, watchOS]
+        platform: [macOS]  # Only test macOS for now due to SPM limitations
         
     steps:
     - uses: actions/checkout@v4
@@ -71,40 +71,55 @@ jobs:
       run: swift package resolve
     
     - name: Build for ${{ matrix.platform }}
-      run: |
-        case "${{ matrix.platform }}" in
-          iOS)
-            swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator
-            ;;
-          macOS)
-            swift build
-            ;;
-          tvOS)
-            swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk appletvsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-tvos15.0-simulator
-            ;;
-          watchOS)
-            swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk watchsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-watchos8.0-simulator
-            ;;
-        esac
+      run: swift build
     
-    - name: Run tests (macOS only)
-      if: matrix.platform == 'macOS'
+    - name: Run tests
       run: swift test --enable-code-coverage
     
     - name: Generate code coverage
-      if: matrix.platform == 'macOS'
       run: |
         xcrun llvm-cov export -format="lcov" \
           .build/debug/CoinGeckoSwiftSDKPackageTests.xctest/Contents/MacOS/CoinGeckoSwiftSDKPackageTests \
           -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
     
     - name: Upload coverage to Codecov
-      if: matrix.platform == 'macOS'
       uses: codecov/codecov-action@v4
       with:
         file: coverage.lcov
         flags: swift
         name: codecov-swift
+
+  # MARK: - Platform Compatibility Check (using Xcode)
+  platform-check:
+    name: Platform Compatibility Check
+    runs-on: macos-14
+    needs: validate
+    strategy:
+      matrix:
+        platform: [iOS, tvOS, watchOS]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    
+    - name: Build for ${{ matrix.platform }}
+      run: |
+        case "${{ matrix.platform }}" in
+          iOS)
+            # Use xcodebuild for iOS instead of swift build
+            xcodebuild -scheme CoinGeckoSwiftSDK -destination 'generic/platform=iOS Simulator' -sdk iphonesimulator build
+            ;;
+          tvOS)
+            # Use xcodebuild for tvOS instead of swift build
+            xcodebuild -scheme CoinGeckoSwiftSDK -destination 'generic/platform=tvOS Simulator' -sdk appletvsimulator build
+            ;;
+          watchOS)
+            # Use xcodebuild for watchOS instead of swift build
+            xcodebuild -scheme CoinGeckoSwiftSDK -destination 'generic/platform=watchOS Simulator' -sdk watchsimulator build
+            ;;
+        esac
 
   # MARK: - Fastlane CI
   fastlane-ci:
@@ -199,7 +214,7 @@ jobs:
   release:
     name: Create Release
     runs-on: macos-14  # Use specific macOS version for consistency
-    needs: [test, fastlane-ci, lint, danger]
+    needs: [test, platform-check, fastlane-ci, lint, danger]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
