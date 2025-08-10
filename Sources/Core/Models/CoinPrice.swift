@@ -111,9 +111,19 @@ public struct CurrencyDetail: CodableModel {
 
 /// Helper for decoding dynamic JSON keys
 public struct DynamicCodingKeys: CodingKey {
+    /// The string value of the coding key
+    /// - Note: This matches the JSON key name exactly
     public var stringValue: String
     
+    /// Creates a coding key from a string value
+    /// - Parameter stringValue: The JSON key name to use for decoding
     public init?(stringValue: String) { self.stringValue = stringValue }
+    
+    /// Integer representation of the coding key (unused)
+    /// - Returns: Always returns nil since we only work with string keys
     public var intValue: Int? { return nil }
+    
+    /// Creates a coding key from an integer value (unused)
+    /// - Returns: Always returns nil since we only work with string keys
     public init?(intValue: Int) { return nil }
 }
