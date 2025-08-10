@@ -19,7 +19,7 @@ public struct SupportedCurrencies: CodableModel {
 }
 
 // MARK: - Codable Implementation
-public extension SupportedCurrencies: Codable {
+extension SupportedCurrencies: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.currencies = try container.decode([String].self)
@@ -54,7 +54,7 @@ public extension SupportedCurrencies {
 }
 
 // MARK: - Collection Conformance (Optional - For ease of use)
-public extension SupportedCurrencies: Collection {
+extension SupportedCurrencies: Collection {
     /// The type of elements stored in the collection.
     public typealias Element = String
     

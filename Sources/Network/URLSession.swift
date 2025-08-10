@@ -14,9 +14,9 @@ public protocol HTTPClient {
 }
 
 /// Extends `URLSession` to conform to `HTTPClient` and provide additional Combine-based utilities.
-public extension URLSession: HTTPClient {
+extension URLSession: HTTPClient {
     /// Returns a publisher that performs the given URL request and emits the data and HTTP response.
-    func publisher(_ request: URLRequest) -> AnyPublisher<(Data, HTTPURLResponse), Error> {
+    private func publisher(_ request: URLRequest) -> AnyPublisher<(Data, HTTPURLResponse), Error> {
         return dataTaskPublisher(for: request)
             .tryMap({ result in
                 guard let httpResponse = result.response as? HTTPURLResponse else {

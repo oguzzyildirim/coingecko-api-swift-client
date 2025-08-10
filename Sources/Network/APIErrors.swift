@@ -27,7 +27,7 @@ public struct ApiErrorDTO: Codable, Sendable {
     }
 }
 
-public enum APIError: Error {
+public enum APIError: LocalizedError {
     case customApiError(ApiErrorDTO)
     case requestFailed
     case normalError(Error)
