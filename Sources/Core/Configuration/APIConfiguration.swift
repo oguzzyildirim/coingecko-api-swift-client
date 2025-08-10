@@ -1,5 +1,5 @@
 //
-//  Configuration.swift
+//  APIConfiguration.swift
 //  CoinGeckoSwiftSDK
 //
 //  Created by Oguz Yildirim on 1.08.2025.

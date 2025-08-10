@@ -128,7 +128,7 @@ if swift_files.any?
   
   # Check for common patterns
   swift_files.each do |file|
-    next unless File.exists?(file)
+    next unless File.exist?(file)
     
     content = File.read(file)
     
