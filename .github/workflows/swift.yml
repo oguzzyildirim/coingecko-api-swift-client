@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  # Use latest Xcode available on macOS-14 (Xcode 16.2 as of 2025)
-  DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+  # Use latest Xcode available on macOS-14 (Xcode 15.4 as of 2025)
+  DEVELOPER_DIR: /Applications/Xcode_15.4.app/Contents/Developer
 
 jobs:
   # MARK: - Swift Package Validation
@@ -25,7 +25,7 @@ jobs:
         swift-version: "5.9"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
     
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -57,7 +57,7 @@ jobs:
         swift-version: "5.9"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
     
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -127,7 +127,7 @@ jobs:
         swift-version: "5.9"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
     
     # Ruby setup with Bundler
     - name: Set up Ruby
@@ -219,7 +219,7 @@ jobs:
         swift-version: "5.9"  # Match your Package.swift version
     
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
     
     # Ruby setup for release tasks
     - name: Set up Ruby
