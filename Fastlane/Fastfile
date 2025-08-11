@@ -79,11 +79,9 @@ platform :ios do
     UI.header "Linting Swift code"
     
     if options[:fix]
-      # SwiftLint ile fix
-      sh("swiftlint --fix --quiet")
+      sh("cd .. && swiftlint --fix --quiet")
     else
-      # Sadece lint
-      sh("swiftlint --quiet")
+      sh("cd .. && swiftlint --quiet")
     end
     
     UI.success "✅ Linting completed"
