@@ -31,6 +31,19 @@ public struct CoinPriceResponse: CodableModel {
         }
     }
     
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: DynamicCodingKeys.self)
+        for (key, value) in coins {
+            guard let codingKey = DynamicCodingKeys(stringValue: key) else {
+                throw EncodingError.invalidValue(key, EncodingError.Context(
+                    codingPath: encoder.codingPath,
+                    debugDescription: "Invalid key: \(key)"
+                ))
+            }
+            try container.encode(value, forKey: codingKey)
+        }
+    }
+    
     /// Gets the price for a specific coin and currency
     public func price(of coinId: String, in currency: String) -> Decimal? {
         return coins[coinId]?.currencies[currency]?.price

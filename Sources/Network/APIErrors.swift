@@ -49,7 +49,7 @@ public enum APIError: LocalizedError {
                 let message = status.errorMessage ?? ""
                 return "\(codeString) \(message)"
             } else {
-                return "Internal error!"
+                return "Internal error"
             }
         case .requestFailed:
             return "Request failed"

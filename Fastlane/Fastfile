@@ -30,7 +30,7 @@ platform :ios do
   lane :build do |options|
     UI.header "Building Swift Package"
   
-    # Şimdilik sadece macOS build - Swift 5.9 uyumluluk sorunu nedeniyle
+    # For now, only macOS build - due to Swift 5.9 compatibility issues
     platforms = options[:platforms] || ["macOS"]
   
     platforms.each do |platform|
@@ -96,7 +96,7 @@ platform :ios do
   lane :release_build do
     UI.header "Building release version"
     
-    # Release configuration ile build
+    # Build with release configuration
     sh("cd .. && swift build -c release")
     
     UI.success "✅ Release build completed"

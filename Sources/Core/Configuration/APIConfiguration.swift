@@ -10,7 +10,10 @@ import Foundation
 public typealias CoinGeckoConfiguration = APIConfiguration
 
 // MARK: - API Configuration
+/// A shared configuration class to manage API settings for CoinGecko.
+/// It supports different environments and handles the API key safely using a concurrent queue.
 public final class APIConfiguration: @unchecked Sendable {
+    /// Shared singleton instance to use throughout the app
     public static let shared = APIConfiguration()
     
     private var _apiKey: String?
@@ -18,6 +21,7 @@ public final class APIConfiguration: @unchecked Sendable {
     
     private var _environment: Environment = .free
 
+    /// Current environment used for API requests (.free or .pro)
     public var environment: Environment {
         get {
             queue.sync { _environment }
@@ -31,6 +35,7 @@ public final class APIConfiguration: @unchecked Sendable {
     
     private init() {}
     
+    /// API key used in requests. It is thread-safe.
     public var apiKey: String? {
         get {
             queue.sync { _apiKey }
@@ -42,14 +47,17 @@ public final class APIConfiguration: @unchecked Sendable {
         }
     }
     
+    /// Base URL for free CoinGecko API
     public var baseURL: String {
         return "https://api.coingecko.com/api/v3"
     }
     
+    /// Base URL for pro CoinGecko API
     public var proBaseURL: String {
         return "https://pro-api.coingecko.com/api/v3"
     }
     
+    /// Returns the current base URL depending on the environment
     public var currentBaseURL: String {
         switch environment {
         case .free:
@@ -59,7 +67,14 @@ public final class APIConfiguration: @unchecked Sendable {
         }
     }
     
-    public func configure(apiKey: String, environment: Environment = .free) {
+    /// Set apiKey and environment at once
+        /// - Parameters:
+        ///   - apiKey: The API key string
+        ///   - environment: The API environment, default is .free
+    public func configure(
+        apiKey: String,
+        environment: Environment = .free
+    ) {
         self.apiKey = apiKey
         self.environment = environment
     }
