@@ -14,7 +14,11 @@ final class LiveAPITests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        API.configure(apiKey: "YOUR_API_KEY")
+        guard let apiKey = ProcessInfo.processInfo.environment["COINGECKO_API_KEY"], !apiKey.isEmpty else {
+            XCTFail("API key not found in environment")
+            return
+        }
+        API.configure(apiKey: apiKey)
     }
     
     override func tearDown() {

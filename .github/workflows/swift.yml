@@ -117,6 +117,9 @@ jobs:
     runs-on: macos-14  # Use specific macOS version for consistency
     needs: validate
     
+    env:
+      COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+
     steps:
     - uses: actions/checkout@v4
 
