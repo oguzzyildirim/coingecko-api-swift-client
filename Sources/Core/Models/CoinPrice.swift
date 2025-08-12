@@ -27,13 +27,6 @@ public struct CoinPriceResponse: CodableModel {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: DynamicCodingKeys.self)
         for (key, value) in coins {
-            try container.encode(value, forKey: DynamicCodingKeys(stringValue: key)!)
-        }
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: DynamicCodingKeys.self)
-        for (key, value) in coins {
             guard let codingKey = DynamicCodingKeys(stringValue: key) else {
                 throw EncodingError.invalidValue(key, EncodingError.Context(
                     codingPath: encoder.codingPath,
