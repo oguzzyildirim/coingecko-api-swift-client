@@ -43,6 +43,8 @@ jobs:
     name: Test on ${{ matrix.platform }}
     runs-on: macos-14  # Use specific macOS version for consistency
     needs: validate
+    env:
+      COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
     strategy:
       matrix:
         platform: [macOS]
