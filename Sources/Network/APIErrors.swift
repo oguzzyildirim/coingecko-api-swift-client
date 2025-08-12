@@ -27,7 +27,7 @@ public struct ApiErrorDTO: Codable, Sendable {
     }
 }
 
-enum APIError: Error {
+public enum APIError: LocalizedError {
     case customApiError(ApiErrorDTO)
     case requestFailed
     case normalError(Error)
@@ -41,7 +41,7 @@ enum APIError: Error {
     /// This computed property formats the error information in a consistent way
     /// that can be presented to users or logged for debugging purposes.
     /// - Returns: String description of the error
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .customApiError(let apiErrorDTO):
             if let status = apiErrorDTO.status {
@@ -49,7 +49,7 @@ enum APIError: Error {
                 let message = status.errorMessage ?? ""
                 return "\(codeString) \(message)"
             } else {
-                return "Internal error!"
+                return "Internal error"
             }
         case .requestFailed:
             return "Request failed"

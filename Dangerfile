@@ -38,7 +38,7 @@ if swift_files.any?
   
   # Check for TODO/FIXME
   swift_files.each do |file|
-    next unless File.exists?(file)
+    next unless File.exist?(file)
     
     File.foreach(file).with_index do |line, index|
       if line.include?('TODO') || line.include?('FIXME')
@@ -58,6 +58,34 @@ test_files = (added_files + modified_files).select { |file| file.include?('Test'
 
 if swift_files.any? && test_files.empty?
   warn "You've added/modified Swift files but no tests. Consider adding tests for better coverage."
+end
+
+# MARK: - Live API Tests
+live_api_test_files = (added_files + modified_files).select { |file| 
+  file.include?('LiveAPITests.swift') || file.include?('LiveAPI') 
+}
+
+if live_api_test_files.any?
+  warn "🔴 Live API tests have been modified: #{live_api_test_files.join(', ')}. These tests make real API calls and should be reviewed carefully."
+  message "Please ensure:"
+  message "• API keys and sensitive data are properly handled"
+  message "• Tests don't exceed API rate limits"
+  message "• Tests can handle API downtime gracefully"
+  message "• Mock alternatives are available for CI/CD pipeline"
+end
+
+# Check if LiveAPITests.swift is being added for the first time
+if added_files.include?('LiveAPITests.swift')
+  message "🆕 New LiveAPITests.swift file detected. Make sure it follows the project's testing guidelines."
+end
+
+# If source files changed but LiveAPITests.swift wasn't updated
+api_source_files = swift_files.select { |file| 
+  file.include?('API') && !file.include?('Test') 
+}
+
+if api_source_files.any? && !live_api_test_files.any?
+  message "💡 API source files were modified but LiveAPITests.swift wasn't updated. Consider if live tests need updates."
 end
 
 # MARK: - Documentation
@@ -128,7 +156,7 @@ if swift_files.any?
   
   # Check for common patterns
   swift_files.each do |file|
-    next unless File.exists?(file)
+    next unless File.exist?(file)
     
     content = File.read(file)
     

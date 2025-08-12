@@ -8,14 +8,17 @@
 import Foundation
 import Combine
 
+/// A protocol defining an HTTP client capable of performing asynchronous requests.
 public protocol HTTPClient {
     func perform(_ request: URLRequest) async throws -> (Data, HTTPURLResponse)
 }
 
+/// Extends `URLSession` to conform to `HTTPClient` and provide additional Combine-based utilities.
 extension URLSession: HTTPClient {
-    func publisher(_ request: URLRequest) -> AnyPublisher<(Data, HTTPURLResponse), Error> {
+    /// Returns a publisher that performs the given URL request and emits the data and HTTP response.
+    private func publisher(_ request: URLRequest) -> AnyPublisher<(Data, HTTPURLResponse), Error> {
         return dataTaskPublisher(for: request)
-            .tryMap ({ result in
+            .tryMap({ result in
                 guard let httpResponse = result.response as? HTTPURLResponse else {
                     throw APIError.invalidResponseType
                 }
@@ -24,6 +27,7 @@ extension URLSession: HTTPClient {
             .eraseToAnyPublisher()
     }
     
+    /// Performs the given URL request asynchronously and returns the resulting data and HTTP response.
     public func perform(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?

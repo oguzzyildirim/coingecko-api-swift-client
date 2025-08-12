@@ -13,8 +13,6 @@ import Foundation
 /// for different API endpoints by specifying URL components, HTTP method, headers, and body parameters.
 public protocol APIEndpoint {
     var baseURLString: String? { get }
-    //var apiVersion: String? { get }
-    //var separatorPath: String? { get }
     var path: String { get }
     var headers: [String: String]? { get }
     var queryItems: [URLQueryItem]? { get }
@@ -23,7 +21,7 @@ public protocol APIEndpoint {
     var customDataBody: Data? { get }
 }
 
-extension APIEndpoint {
+public extension APIEndpoint {
     /// Creates and returns a fully configured URLRequest based on the endpoint properties
     public func makeRequest() throws -> URLRequest {
         guard let urlComponents = createURLComponents() else {
@@ -43,7 +41,7 @@ extension APIEndpoint {
     /// - Returns: Configured URLComponents or nil if creation fails
     private func createURLComponents() -> URLComponents? {
         guard let baseURLString = baseURLString,
-                var components = URLComponents(string: baseURLString) else {
+              var components = URLComponents(string: baseURLString) else {
             return nil
         }
         
@@ -78,8 +76,14 @@ extension APIEndpoint {
                         throw APIError.encoding(error)
                     }
                 case .urlEncoded:
-                    let paramString = params.map { "\($0.key)=\("\($0.value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
+                    let paramString = params
+                        .map { key, value in
+                            let encodedValue = "\(value)"
+                                .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                            return "\(key)=\(encodedValue)"
+                        }
                         .joined(separator: "&")
+                    
                     request.httpBody = paramString.data(using: .utf8)
                 }
             } else {
@@ -103,6 +107,17 @@ extension APIEndpoint {
     }
 }
 
+/// A type-safe wrapper for values that can be safely sent across concurrency domains.
+///
+/// `SendableValue` is an enum representing primitive and composite types that conform to `Sendable`,
+/// making it safe for use in concurrent contexts. It supports basic types like `String`, `Int`, `Double`, and `Bool`,
+/// as well as arrays and dictionaries of other `SendableValue` instances. A `null` case is also provided to represent
+/// an absence of value, mapping to `NSNull` when serialized.
+///
+/// This type is useful for building APIs that need to store or transmit heterogeneous and type-erased values
+/// while maintaining thread safety.
+///
+/// - Note: Use the `rawValue` property to retrieve the underlying value as `Any`.
 @frozen
 public enum SendableValue: Sendable {
     case string(String)
@@ -113,6 +128,7 @@ public enum SendableValue: Sendable {
     case dictionary([String: SendableValue])
     case null
     
+    /// Returns the underlying raw value for the case, type-erased to `Any`.
     public var rawValue: Any {
         switch self {
         case .string(let value): return value
@@ -126,8 +142,23 @@ public enum SendableValue: Sendable {
     }
 }
 
-// Convenience initializers
+/// Convenience initializers and factory methods for creating `SendableValue` instances.
 public extension SendableValue {
+    /// Creates a `SendableValue` instance from a given `Any` value.
+    ///
+    /// This method inspects the runtime type of the provided value and returns
+    /// the corresponding `SendableValue` case. Supported types include:
+    /// - `String` → `.string`
+    /// - `Int` → `.int`
+    /// - `Double` → `.double`
+    /// - `Bool` → `.bool`
+    /// - `[Any]` → `.array`, recursively mapping each element to a `SendableValue`
+    /// - `[String: Any]` → `.dictionary`, recursively mapping each value to a `SendableValue`
+    ///
+    /// Any unsupported type will result in `.null`.
+    ///
+    /// - Parameter value: The value to convert into a `SendableValue`.
+    /// - Returns: A corresponding `SendableValue` instance.
     static func from(_ value: Any) -> SendableValue {
         switch value {
         case let string as String: return .string(string)

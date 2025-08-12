@@ -83,5 +83,3 @@ extension Array: EncodableModel where Element: EncodableModel {
         return Element.encoder
     }
 }
-
-

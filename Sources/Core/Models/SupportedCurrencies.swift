@@ -9,8 +9,10 @@ import Foundation
 
 // MARK: - SupportedCurrencies Model
 public struct SupportedCurrencies: CodableModel {
+    /// List of currency codes.
     public let currencies: [String]
     
+    /// Initialize with a list of currencies.
     public init(currencies: [String]) {
         self.currencies = currencies
     }
@@ -19,7 +21,6 @@ public struct SupportedCurrencies: CodableModel {
 // MARK: - Codable Implementation
 extension SupportedCurrencies: Codable {
     public init(from decoder: Decoder) throws {
-        // API direkt string array döndüğü için
         let container = try decoder.singleValueContainer()
         self.currencies = try container.decode([String].self)
     }
@@ -31,46 +32,55 @@ extension SupportedCurrencies: Codable {
 }
 
 // MARK: - Convenience Methods
-extension SupportedCurrencies {
-    /// Belirli bir currency'nin desteklenip desteklenmediğini kontrol eder
-    public func contains(_ currency: String) -> Bool {
+public extension SupportedCurrencies {
+    /// Checks if currency exists (case-insensitive).
+    func contains(_ currency: String) -> Bool {
         return currencies.contains(currency.lowercased())
     }
     
-    /// Crypto ve fiat currency'leri ayırır (basit heuristic)
-    public var cryptoCurrencies: [String] {
+    /// Returns crypto currencies (length ≤ 4, lowercase or digit).
+    var cryptoCurrencies: [String] {
         return currencies.filter { currency in
-            // Genellikle crypto'lar 3-4 karakter ve küçük harf
             currency.count <= 4 && currency.allSatisfy { $0.isLowercase || $0.isNumber }
         }
     }
     
-    public var fiatCurrencies: [String] {
+    /// Returns fiat currencies (length = 3, uppercase).
+    var fiatCurrencies: [String] {
         return currencies.filter { currency in
-            // Fiat'lar genellikle 3 karakter ve büyük harf ISO kodu
             currency.count == 3 && currency.allSatisfy { $0.isUppercase }
         }
     }
 }
 
-// MARK: - Collection Conformance (Optional - Kullanım kolaylığı için)
+// MARK: - Collection Conformance (Optional - For ease of use)
 extension SupportedCurrencies: Collection {
+    /// The type of elements stored in the collection.
     public typealias Element = String
+    
+    /// The type used for indexing into the collection.
     public typealias Index = Array<String>.Index
     
+    /// The position of the first element in a nonempty collection.
     public var startIndex: Index {
         return currencies.startIndex
     }
     
+    /// The collection’s “past the end” position—that is, the position one greater than the last valid subscript argument.
     public var endIndex: Index {
         return currencies.endIndex
     }
     
+    /// Accesses the element at the specified position.
+    /// - Parameter index: The position of the element to access.
     public subscript(index: Index) -> Element {
         return currencies[index]
     }
     
-    public func index(after i: Index) -> Index {
-        return currencies.index(after: i)
+    /// Returns the position immediately after the given index.
+    /// - Parameter index: A valid index of the collection.
+    /// - Returns: The index value immediately after `index`.
+    public func index(after index: Index) -> Index {
+        return currencies.index(after: index)
     }
 }
