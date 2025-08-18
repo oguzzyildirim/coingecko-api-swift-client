@@ -26,11 +26,16 @@ final class LiveAPITests: XCTestCase {
     
     override func tearDown() {
         API.resetConfiguration()
-        Thread.sleep(forTimeInterval: 5)
+        Thread.sleep(forTimeInterval: 6)
         super.tearDown()
     }
     
+    private func waitForRateLimit() {
+        Thread.sleep(forTimeInterval: 2)
+    }
+    
     func test_SupportedCurrencies_WithExecuteMethod_ReturnsValidCurrencies() async {
+        waitForRateLimit()
         // When
         do {
             let response = try await API.supportedCurrencies().execute()
@@ -46,6 +51,7 @@ final class LiveAPITests: XCTestCase {
     // MARK: - Coin(to Bitcoin for now) Price Tests
     
     func test_CoinPrice_WithExecuteMethod_ReturnsValidUSDPrice() async {
+        waitForRateLimit()
         // When
         do {
             let response = try await API.coinPrice(ids: ids, vsCurrencies: currencies).execute()
@@ -62,6 +68,7 @@ final class LiveAPITests: XCTestCase {
     }
     
     func test_CoinPrice_WithPerformMethod_ReturnsValidUSDPrice() {
+        waitForRateLimit()
         // Given
         let expectation = expectation(description: "API call completes")
         
@@ -84,6 +91,7 @@ final class LiveAPITests: XCTestCase {
     }
     
     func test_CoinPriceByTokenAdress_WithPerformMethod_ReturnsValidUSDPrice() {
+        waitForRateLimit()
         // Given
         let expectation = expectation(description: "API call completes")
         
@@ -110,6 +118,7 @@ final class LiveAPITests: XCTestCase {
     }
     
     func test_CoinPriceByTokenAdress_WithExecuteMethod_ReturnsValidUSDPrice() async {
+        waitForRateLimit()
         // When
         do {
             // Then
@@ -126,6 +135,7 @@ final class LiveAPITests: XCTestCase {
     // MARK: - Coins List Test
     
     func test_coinsList_WithExecuteMethod_ReturnsValidCoins() async {
+        waitForRateLimit()
         // When
         do {
             // Then
@@ -138,6 +148,7 @@ final class LiveAPITests: XCTestCase {
     }
     
     func test_coinsList_WithPerformMethod_ReturnsValidCoins() {
+        waitForRateLimit()
         // Given
         let expectation = expectation(description: "API call completes")
         
