@@ -79,7 +79,7 @@ final class LiveAPITests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 5)
+        waitForExpectations(timeout: 15)
     }
     
     func test_CoinPriceByTokenAdress_WithPerformMethod_ReturnsValidUSDPrice() {
@@ -105,7 +105,7 @@ final class LiveAPITests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 5)
+        waitForExpectations(timeout: 15)
     }
     
     func test_CoinPriceByTokenAdress_WithExecuteMethod_ReturnsValidUSDPrice() async {
