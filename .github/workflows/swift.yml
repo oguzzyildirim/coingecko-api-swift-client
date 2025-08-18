@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: 
+    branches:
       - development
   workflow_dispatch:
 
@@ -14,190 +14,190 @@ jobs:
   # MARK: - Swift Package Validation
   validate:
     name: Validate Package
-    runs-on: macos-14  # Use specific macOS version for consistency
+    runs-on: macos-14 # Use specific macOS version for consistency
     steps:
-    - uses: actions/checkout@v4
-    
-    # Set up Swift/Xcode version explicitly
-    - name: Setup Swift
-      uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: "5.9"  # Match your Package.swift version
-    
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    
-    - name: Cache Swift Package Manager
-      uses: actions/cache@v4
-      with:
-        path: .build
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
-    
-    - name: Validate Package
-      run: swift package dump-package
+      - uses: actions/checkout@v4
+
+      # Set up Swift/Xcode version explicitly
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9" # Match your Package.swift version
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Cache Swift Package Manager
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Validate Package
+        run: swift package dump-package
 
   # MARK: - Build & Test
   test:
     name: Test on ${{ matrix.platform }}
-    runs-on: macos-14  # Use specific macOS version for consistency
+    runs-on: macos-14 # Use specific macOS version for consistency
     needs: validate
     env:
       COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
     strategy:
       matrix:
         platform: [macOS]
-        
-    steps:
-    - uses: actions/checkout@v4
-    
-    # Set up Swift/Xcode version explicitly
-    - name: Setup Swift
-      uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: "5.9"  # Match your Package.swift version
-    
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    
-    - name: Cache Swift Package Manager
-      uses: actions/cache@v4
-      with:
-        path: .build
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
-    
-    - name: Resolve dependencies
-      run: swift package resolve
 
-    - name: Build for ${{ matrix.platform }}
-      run: |
-        case "${{ matrix.platform }}" in
-          iOS)
-            echo "⚠️ iOS build temporarily disabled due to Swift 5.9/SDK compatibility"
-            # swift build \
-            #   --triple arm64-apple-ios17.2-simulator \
-            #   -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path)
-            ;;
-          macOS)
-            swift build
-            ;;
-          tvOS)
-            echo "⚠️ tvOS build temporarily disabled due to Swift 5.9/SDK compatibility"
-            # swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk appletvsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-tvos15.0-simulator
-            ;;
-          watchOS)
-            echo "⚠️ watchOS build temporarily disabled due to Swift 5.9/SDK compatibility"
-            # swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk watchsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-watchos8.0-simulator
-            ;;
-        esac
-    
-    - name: Run tests (macOS only)
-      if: matrix.platform == 'macOS'
-      run: swift test --enable-code-coverage
-    
-    - name: Generate code coverage
-      if: matrix.platform == 'macOS'
-      run: |
-        xcrun llvm-cov export -format="lcov" \
-          .build/debug/CoinGeckoSwiftSDKPackageTests.xctest/Contents/MacOS/CoinGeckoSwiftSDKPackageTests \
-          -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
-    
-    - name: Upload coverage to Codecov
-      if: matrix.platform == 'macOS'
-      uses: codecov/codecov-action@v4
-      with:
-        file: coverage.lcov
-        flags: swift
-        name: codecov-swift
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set up Swift/Xcode version explicitly
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9" # Match your Package.swift version
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Cache Swift Package Manager
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Resolve dependencies
+        run: swift package resolve
+
+      - name: Build for ${{ matrix.platform }}
+        run: |
+          case "${{ matrix.platform }}" in
+            iOS)
+              echo "⚠️ iOS build temporarily disabled due to Swift 5.9/SDK compatibility"
+              # swift build \
+              #   --triple arm64-apple-ios17.2-simulator \
+              #   -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path)
+              ;;
+            macOS)
+              swift build
+              ;;
+            tvOS)
+              echo "⚠️ tvOS build temporarily disabled due to Swift 5.9/SDK compatibility"
+              # swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk appletvsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-tvos15.0-simulator
+              ;;
+            watchOS)
+              echo "⚠️ watchOS build temporarily disabled due to Swift 5.9/SDK compatibility"
+              # swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk watchsimulator --show-sdk-path) -Xswiftc -target -Xswiftc arm64-apple-watchos8.0-simulator
+              ;;
+          esac
+
+      - name: Run tests (macOS only)
+        if: matrix.platform == 'macOS'
+        run: swift test --enable-code-coverage
+
+      - name: Generate code coverage
+        if: matrix.platform == 'macOS'
+        run: |
+          xcrun llvm-cov export -format="lcov" \
+            .build/debug/CoinGeckoSwiftSDKPackageTests.xctest/Contents/MacOS/CoinGeckoSwiftSDKPackageTests \
+            -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
+
+      - name: Upload coverage to Codecov
+        if: matrix.platform == 'macOS'
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.lcov
+          flags: swift
+          name: codecov-swift
 
   # MARK: - Fastlane CI
   fastlane-ci:
     name: Fastlane CI
-    runs-on: macos-14  # Use specific macOS version for consistency
-    needs: validate
-    
+    runs-on: macos-14 # Use specific macOS version for consistency
+    needs: test
+
     env:
       COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install SwiftLint
-      run: brew install swiftlint
-    
-    # Set up Swift/Xcode version explicitly
-    - name: Setup Swift
-      uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: "5.9"  # Match your Package.swift version
-    
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    
-    # Ruby setup with Bundler
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2.2'
-        bundler-cache: true # runs 'bundle install' and caches gems
-    
-    - name: Cache Swift Package Manager
-      uses: actions/cache@v4
-      with:
-        path: .build
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
-    
-    - name: Install Ruby dependencies
-      run: bundle install
-    
-    - name: Run Fastlane CI
-      run: bundle exec fastlane ci
-    
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: Build/TestResults/
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      # Set up Swift/Xcode version explicitly
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9" # Match your Package.swift version
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      # Ruby setup with Bundler
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.2"
+          bundler-cache: true # runs 'bundle install' and caches gems
+
+      - name: Cache Swift Package Manager
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Install Ruby dependencies
+        run: bundle install
+
+      - name: Run Fastlane CI
+        run: bundle exec fastlane ci
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: Build/TestResults/
 
   # MARK: - Danger PR Review
   danger:
     name: Danger PR Review
-    runs-on: macos-14  # Use specific macOS version for consistency
+    runs-on: macos-14 # Use specific macOS version for consistency
     if: github.event_name == 'pull_request'
-    
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Danger needs full git history
-    
-    # Ruby setup with Bundler
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2.2'
-        bundler-cache: true
-    
-    - name: Install SwiftLint
-      run: brew install swiftlint
-    
-    - name: Install Ruby dependencies
-      run: bundle install
-    
-    - name: Run Danger
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: bundle exec danger
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Danger needs full git history
+
+      # Ruby setup with Bundler
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.2"
+          bundler-cache: true
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Install Ruby dependencies
+        run: bundle install
+
+      - name: Run Danger
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bundle exec danger
 
   # MARK: - SwiftLint
   lint:
     name: SwiftLint
-    runs-on: macos-14  # Use specific macOS version for consistency
+    runs-on: macos-14 # Use specific macOS version for consistency
 
     steps:
       - uses: actions/checkout@v4
@@ -211,50 +211,50 @@ jobs:
   # MARK: - Release
   release:
     name: Create Release
-    runs-on: macos-14  # Use specific macOS version for consistency
+    runs-on: macos-14 # Use specific macOS version for consistency
     needs: [test, fastlane-ci, lint, danger]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    # Set up Swift/Xcode version explicitly
-    - name: Setup Swift
-      uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: "5.9"  # Match your Package.swift version
-    
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    
-    # Ruby setup for release tasks
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2.2'
-        bundler-cache: true
-    
-    - name: Install Ruby dependencies
-      run: bundle install
-    
-    - name: Build release
-      run: swift build -c release
-    
-    - name: Create tag
-      run: |
-        VERSION=$(date +'%Y.%m.%d')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        git tag $VERSION
-        git push origin $VERSION
-    
-    - name: Create Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
-        draft: false
-        prerelease: false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Set up Swift/Xcode version explicitly
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9" # Match your Package.swift version
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      # Ruby setup for release tasks
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.2"
+          bundler-cache: true
+
+      - name: Install Ruby dependencies
+        run: bundle install
+
+      - name: Build release
+        run: swift build -c release
+
+      - name: Create tag
+        run: |
+          VERSION=$(date +'%Y.%m.%d')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
+          draft: false
+          prerelease: false
