@@ -26,6 +26,7 @@ final class LiveAPITests: XCTestCase {
     
     override func tearDown() {
         API.resetConfiguration()
+        Thread.sleep(forTimeInterval: 1.5)
         super.tearDown()
     }
     
