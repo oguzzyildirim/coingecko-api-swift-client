@@ -8,8 +8,11 @@
 import XCTest
 @testable import CoinGeckoSwiftSDK
 
+@MainActor
 final class LiveAPITests: XCTestCase {
     let ids = ["bitcoin"]
+    let platformId = "base"
+    let contractAddress = "0x06abb84958029468574b28b6e7792a770ccaa2f6"
     let currencies = ["usd"]
     
     override func setUp() {
@@ -23,10 +26,16 @@ final class LiveAPITests: XCTestCase {
     
     override func tearDown() {
         API.resetConfiguration()
+        Thread.sleep(forTimeInterval: 8)
         super.tearDown()
     }
     
+    private func waitForRateLimit() {
+        Thread.sleep(forTimeInterval: 2)
+    }
+    
     func test_SupportedCurrencies_WithExecuteMethod_ReturnsValidCurrencies() async {
+        waitForRateLimit()
         // When
         do {
             let response = try await API.supportedCurrencies().execute()
@@ -39,9 +48,10 @@ final class LiveAPITests: XCTestCase {
         }
     }
     
-    // MARK: - Bitcoin Price Tests
+    // MARK: - Coin(to Bitcoin for now) Price Tests
     
     func test_CoinPrice_WithExecuteMethod_ReturnsValidUSDPrice() async {
+        waitForRateLimit()
         // When
         do {
             let response = try await API.coinPrice(ids: ids, vsCurrencies: currencies).execute()
@@ -57,8 +67,8 @@ final class LiveAPITests: XCTestCase {
         }
     }
     
-    @MainActor
     func test_CoinPrice_WithPerformMethod_ReturnsValidUSDPrice() {
+        waitForRateLimit()
         // Given
         let expectation = expectation(description: "API call completes")
         
@@ -77,6 +87,83 @@ final class LiveAPITests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 5)
+        waitForExpectations(timeout: 15)
+    }
+    
+    func test_CoinPriceByTokenAdress_WithPerformMethod_ReturnsValidUSDPrice() {
+        waitForRateLimit()
+        // Given
+        let expectation = expectation(description: "API call completes")
+        
+        // When
+        API.coinPriceByTokenAddress(platformId: platformId,
+                                    contractAddresses: contractAddress,
+                                    vsCurrencies: currencies).perform { result in
+            // Then
+            switch result {
+            case .success(let response):
+                XCTAssertNotNil(response, "Response should not be nil")
+                
+                let usdPrice = response.price(of: self.contractAddress, in: "usd")
+                
+                XCTAssertNotNil(usdPrice, "USD price should not be nil")
+                XCTAssertGreaterThan(usdPrice ?? 0, 0, "USD price should be greater than 0")
+            case .failure(let error):
+                XCTFail("API call failed with error: \(error)")
+            }
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 15)
+    }
+    
+    func test_CoinPriceByTokenAdress_WithExecuteMethod_ReturnsValidUSDPrice() async {
+        waitForRateLimit()
+        // When
+        do {
+            // Then
+            let response = try await API.coinPriceByTokenAddress(platformId: platformId,
+                                                                 contractAddresses: contractAddress,
+                                                                 vsCurrencies: currencies).execute()
+            
+            XCTAssertNotNil(response, "Response should not be nil")
+        } catch {
+            XCTFail("API call failed with error: \(error)")
+        }
+    }
+    
+    // MARK: - Coins List Test
+    
+    func test_coinsList_WithExecuteMethod_ReturnsValidCoins() async {
+        waitForRateLimit()
+        // When
+        do {
+            // Then
+            let response = try await API.coinsList(includePlatform: true).execute()
+            
+            XCTAssertNotNil(response, "Response should not be nil")
+        } catch {
+            XCTFail("API call failed with error: \(error)")
+        }
+    }
+    
+    func test_coinsList_WithPerformMethod_ReturnsValidCoins() {
+        waitForRateLimit()
+        // Given
+        let expectation = expectation(description: "API call completes")
+        
+        // When
+        API.coinsList(includePlatform: true).perform { result in
+            // Then
+            switch result {
+            case .success(let response):
+                XCTAssertNotNil(response, "Response should not be nil")
+            case .failure(let error):
+                XCTFail("API call failed with error: \(error)")
+            }
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 15)
     }
 }
